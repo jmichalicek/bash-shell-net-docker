@@ -8,21 +8,24 @@ EXPOSE 8000
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && apt-get install -y --no-install-recommends sudo wget tar procps \
+RUN apt-get update && apt-get install -y --no-install-recommends sudo wget tar procps locales \
     ca-certificates apt-transport-https && apt-get autoremove && apt-get clean
 
-RUN useradd -ms /bin/bash django && echo "django ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN sed -i -e "s/# en_US.*/en_US.UTF-8 UTF-8/" /etc/locale.gen && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    update-locale LANG=C.UTF-8
+
+RUN useradd -U -ms /bin/bash django && echo "django ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 USER django
-ENV HOME=/home/django
-ENV PYENV_ROOT=$HOME/.pyenv
+ENV PYENV_ROOT=/home/django/.pyenv
 ENV PATH=$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
 
 # Build python using pyenv and then wipe out the build deps
-WORKDIR $HOME
-COPY build_python.sh $HOME/build_python.sh
-RUN bash $HOME/build_python.sh
+WORKDIR /home/django
+COPY build_python.sh /home/django/build_python.sh
+RUN bash /home/django/build_python.sh
 
-RUN mkdir -p /home/django/bash-shell.net/app/ && mkdir /home/django/bash-shell.net/static/
+RUN mkdir -p /home/django/bash-shell.net/app/ && mkdir /home/django/bash-shell.net/static/ && mkdir /home/django/bash-shell.net/static_collected/
 ARG REPO_REFERENCE=master
 WORKDIR /home/django/bash-shell.net/
 
@@ -37,21 +40,24 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo 
 # and then wipe out the build deps
 # the tar command strips the top level directory off of the extracted files
 # since the tarball from github puts the files inside its own dir
-RUN echo 1
 RUN wget https://github.com/jmichalicek/bash-shell.net/archive/$REPO_REFERENCE.tar.gz \
     && tar -zxvf $REPO_REFERENCE.tar.gz --strip 1 -C ./app/ \
     && rm $REPO_REFERENCE.tar.gz
 WORKDIR /home/django/bash-shell.net/app/
 
-RUN pyenv virtualenv 3.6.2 bash-shell-net
-COPY install_python_packages.sh $HOME/install_python_packages.sh
-RUN bash $HOME/install_python_packages.sh
+RUN pyenv virtualenv 3.6.2 blog 
+COPY install_python_packages.sh /home/django/install_python_packages.sh
+RUN bash /home/django/install_python_packages.sh
+ENV SMTP_HOST='' DATABASE_URL='' SMTP_PORT='' SMTP_USER='' SMTP_PASSWORD='' DJANGO_SETTINGS_MODULE='' REDIS_HOST='' \
+  PYTHONIOENCODING="utf8" LC_ALL="en_US.UTF-8"
 
-ENV SMTP_HOST='' DATABASE_URL='' SMTP_PORT='' SMTP_USER='' SMTP_PASSWORD='' DJANGO_SETTINGS_MODULE=''
+COPY run_django.sh /home/django/run_django.sh
 
 ## Expose static collected as volume so that it can be mounted/used elsewhere
-#RUN $(pyenv root)/versions/bash-shell-net/bin/python manage.py collectstatic --no-input
-VOLUME [/home/django/bash-shell.net/static_collected]
-#VOLUME [/home/django/bash-shell.net/media]
+#RUN $(pyenv root)/versions/blog/bin/python manage.py collectstatic --no-input
+VOLUME ["/home/django/bash-shell.net/static_collected"]
+#VOLUME ["/home/django/bash-shell.net/media"]
 
 ENTRYPOINT ["/bin/bash", "-c"]
+#ENTRYPOINT /bin/bash -c
+CMD ["/home/django/run_django.sh"]
