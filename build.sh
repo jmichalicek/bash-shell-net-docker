@@ -9,4 +9,4 @@ TAG_JSON="{\"tag_name\": \"$GIT_TAG\", \"target_commitish\": \"master\", \"name\
 
 curl -s -k -X POST -H "Content-Type: application/json" "https://api.github.com/repos/jmichalicek/bash-shell.net/releases?access_token=$GITHUB_ACCESS_TOKEN" -d "$TAG_JSON"
 docker build --rm -f Dockerfile -t registry.gitlab.com/jmichalicek/bash-shell.net:$DOCKER_TAG --build-arg REPO_REFERENCE=$GIT_TAG .
-docker push registry.gitlab.com/jmichalicek/bash-shell.net
+docker push registry.gitlab.com/jmichalicek/bash-shell.net:$DOCKER_TAG
