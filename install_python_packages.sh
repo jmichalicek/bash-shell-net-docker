@@ -6,7 +6,7 @@ sudo apt-get update && sudo apt-get install -y --force-yes libpq-dev libpq5 && s
 sudo apt-get install -y libjpeg-dev libssl-dev libxml2-dev libxslt-dev && sudo apt-get autoremove -y && sudo apt-get clean -y
 sudo apt-get install -y build-essential libssl-dev zlib1g-dev libbz2-dev git && sudo apt-get autoremove -y && sudo apt-get clean -y
 
-$(pyenv root)/versions/blog/bin/pip install -r $HOME/bash-shell.net/app/requirements.txt
+$(pyenv root)/versions/blog/bin/pip install -r $HOME/bash-shell.net/app/requirements.txt --no-cache-dir
 
 sudo apt-get purge -y libpq-dev && sudo apt-get autoremove -y && sudo apt-get clean -y
 sudo apt-get purge -y libjpeg-dev libssl-dev libxml2-dev libxslt-dev && sudo apt-get autoremove -y && sudo apt-get clean -
