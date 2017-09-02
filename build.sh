@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # TODO: Allow this stuff to be overridden on the command line or with environment variables
-BUILD_NUM=`date +%Y%m%d_%H%M%S`
+BUILD_NUM=`date -u +%Y%m%d_%H%M%S`
 GIT_TAG="v$BUILD_NUM"
 DOCKER_TAG="$BUILD_NUM"
 
