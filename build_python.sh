@@ -4,15 +4,11 @@
 sudo -E apt-get update && sudo apt-get install -y --no-install-recommends make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev wget curl llvm git && sudo apt-get autoremove && sudo apt-get clean
 
 git clone https://github.com/pyenv/pyenv.git $PYENV_ROOT 
-git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv
 
 echo 'eval "$(pyenv init -)"' >> $HOME/.bashrc
-echo 'eval "$(pyenv virtualenv-init -)"' >> $HOME/.bashrc
 echo 'eval "$(pyenv init -)"' >> $HOME/.bash_profile
-echo 'eval "$(pyenv virtualenv-init -)"' >> $HOME/.bash_profile
 
 eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
-pyenv install 3.6.2
-
+$(pyenv root)/bin/pyenv install 3.6.2
+pyenv global 3.6.2 system
 sudo -E DEBIAN_FRONTEND=noninteractive apt-get purge -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev llvm git && sudo apt-get autoremove -y && sudo apt-get clean -y
