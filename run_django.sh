@@ -5,6 +5,6 @@
 cd $HOME/bash-shell.net/app/
 PYENV_DIR=$(pyenv root)
 # no need to sudo as soon as these go to digital ocean spaces
-$(pyenv root)/versions/blog/bin/python manage.py collectstatic --no-input
-$(pyenv root)/versions/blog/bin/python manage.py migrate --no-input
-$(pyenv root)/versions/blog/bin/gunicorn --workers 2 --bind 0.0.0.0:8000 --name django --max-requests=1000 bash_shell_net.wsgi:application
+pipenv run python manage.py collectstatic --no-input
+pipenv run python manage.py migrate --no-input
+pipenv run gunicorn --workers 2 --bind 0.0.0.0:8000 --name django --max-requests=1000 bash_shell_net.wsgi:application

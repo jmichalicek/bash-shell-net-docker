@@ -18,15 +18,14 @@ RUN sed -i -e "s/# en_US.*/en_US.UTF-8 UTF-8/" /etc/locale.gen && \
 RUN useradd -U -ms /bin/bash django && echo "django ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 USER django
 ENV PYENV_ROOT=/home/django/.pyenv
-ENV PATH=$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+ENV PATH=$PYENV_ROOT/bin:$PYENV_ROOT/versions/3.6.2/bin:$PATH
 
 # Build python using pyenv and then wipe out the build deps
 WORKDIR /home/django
 COPY build_python.sh /home/django/build_python.sh
 RUN bash /home/django/build_python.sh
-
+RUN $PYENV_ROOT/versions/3.6.2/bin/pip install pipenv
 RUN mkdir -p /home/django/bash-shell.net/app/ && mkdir /home/django/bash-shell.net/static/ && mkdir /home/django/bash-shell.net/static_collected/
-ARG REPO_REFERENCE=master
 WORKDIR /home/django/bash-shell.net/
 
 # set up apt repo for postgres stuff
@@ -35,7 +34,8 @@ WORKDIR /home/django/bash-shell.net/
 RUN sudo apt-get install -y --no-install-recommends gnupg && sudo apt-get autoremove -y && sudo apt-get clean -y
 RUN echo 'deb https://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-
+COPY pip.conf /home/django/pip.conf
+ARG REPO_REFERENCE=master
 # now install python packages into the virtualenv, these may need to build things, etc.
 # and then wipe out the build deps
 # the tar command strips the top level directory off of the extracted files
@@ -45,12 +45,10 @@ RUN wget https://github.com/jmichalicek/bash-shell.net/archive/$REPO_REFERENCE.t
     && rm $REPO_REFERENCE.tar.gz
 WORKDIR /home/django/bash-shell.net/app/
 
-RUN pyenv virtualenv 3.6.2 blog 
 COPY install_python_packages.sh /home/django/install_python_packages.sh
 RUN bash /home/django/install_python_packages.sh
 ENV SMTP_HOST='' DATABASE_URL='' SMTP_PORT='' SMTP_USER='' SMTP_PASSWORD='' DJANGO_SETTINGS_MODULE='' REDIS_HOST='' \
   PYTHONIOENCODING="utf8" LC_ALL="en_US.UTF-8"
-
 COPY run_django.sh /home/django/run_django.sh
 
 ## Expose static collected as volume so that it can be mounted/used elsewhere
@@ -59,5 +57,4 @@ VOLUME ["/home/django/bash-shell.net/static_collected"]
 #VOLUME ["/home/django/bash-shell.net/media"]
 
 ENTRYPOINT ["/bin/bash", "-c"]
-#ENTRYPOINT /bin/bash -c
 CMD ["/home/django/run_django.sh"]
