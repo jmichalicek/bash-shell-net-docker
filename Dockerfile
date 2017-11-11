@@ -18,13 +18,13 @@ RUN sed -i -e "s/# en_US.*/en_US.UTF-8 UTF-8/" /etc/locale.gen && \
 RUN useradd -U -ms /bin/bash django && echo "django ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 USER django
 ENV PYENV_ROOT=/home/django/.pyenv
-ENV PATH=$PYENV_ROOT/bin:$PYENV_ROOT/versions/3.6.2/bin:$PATH
+ENV PATH=$PYENV_ROOT/bin:$PYENV_ROOT/versions/3.6.3/bin:$PATH
 
 # Build python using pyenv and then wipe out the build deps
 WORKDIR /home/django
 COPY build_python.sh /home/django/build_python.sh
 RUN bash /home/django/build_python.sh
-RUN $PYENV_ROOT/versions/3.6.2/bin/pip install pipenv
+RUN $PYENV_ROOT/versions/3.6.3/bin/pip install pipenv
 RUN mkdir -p /home/django/bash-shell.net/app/ && mkdir /home/django/bash-shell.net/static/ && mkdir /home/django/bash-shell.net/static_collected/
 WORKDIR /home/django/bash-shell.net/
 
